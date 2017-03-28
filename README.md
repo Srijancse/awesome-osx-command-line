@@ -31,10 +31,10 @@ For more terminal shell goodness, please also see this list's sister list [Aweso
 - [Developer](#developer)
     - [Vim](#vim)
     - [Xcode](#xcode)
-- [Disks and Volumes](#disks-and-volumes)
-    - [Disk Images](#disk-images)
 - [Dock](#dock)
 - [Documents](#documents)
+- [Files, Disks and Volumes](#files-disks-and-volumes)
+    - [Disk Images](#disk-images)
 - [Finder](#finder)
     - [Files and Folders](#files-and-folders)
     - [Layout](#layout)
@@ -61,6 +61,7 @@ For more terminal shell goodness, please also see this list's sister list [Aweso
     - [Networking Tools](#networking-tools)
     - [SSH](#ssh)
     - [TCP/IP](#tcpip)
+    - [TFTP](#tftp)
     - [Wi-Fi](#wi-fi)
 - [Package Managers](#package-managers)
 - [Printing](#printing)
@@ -211,6 +212,7 @@ Code from: http://web.archive.org/web/20071008123746/http://www.hawkwings.net/20
 Originally by "pmbuko" with modifications by Romulo
 Updated by Brett Terpstra 2012
 Updated by Mathias Törnblom 2015 to support V3 in El Capitan and still keep backwards compatibility
+Updated by Andrei Miclaus 2017 to support V4 in Sierra
 *)
 
 tell application "Mail" to quit
@@ -218,7 +220,7 @@ set os_version to do shell script "sw_vers -productVersion"
 set mail_version to "V2"
 considering numeric strings
     if "10.10" <= os_version then set mail_version to "V3"
-    if "10.12" < os_version then set mail_version to "V4" # for osx sierra
+    if "10.12" < os_version then set mail_version to "V4"
 end considering
 
 set sizeBefore to do shell script "ls -lnah ~/Library/Mail/" & mail_version & "/MailData | grep -E 'Envelope Index$' | awk {'print $5'}"
@@ -278,7 +280,7 @@ defaults write com.apple.TextEdit RichText -int 0
 #### Change Backup Interval
 This changes the interval to 30 minutes. The integer value is the time in seconds.
 ```bash
-sudo defaults write /System/Library/Launch Daemons/com.apple.backupd-auto StartInterval -int 1800
+sudo defaults write /System/Library/LaunchDaemons/com.apple.backupd-auto StartInterval -int 1800
 ```
 
 #### Local Backups
@@ -334,7 +336,102 @@ xcrun simctl delete unavailable
 ```
 
 
-## Disks and Volumes
+## Dock
+
+#### Add a Stack with Recent Applications
+```bash
+defaults write com.apple.dock persistent-others -array-add '{ "tile-data" = { "list-type" = 1; }; "tile-type" = "recents-tile"; }' && \
+killall Dock
+```
+
+#### Add a Space
+```bash
+defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}' && \
+killall Dock
+```
+
+#### Auto Rearrange Spaces Based on Most Recent Use
+```bash
+# Enable (Default)
+defaults write com.apple.dock mru-spaces -bool true && \
+killall Dock
+
+# Disable
+defaults write com.apple.dock mru-spaces -bool false && \
+killall Dock
+```
+
+#### Icon Bounce
+Global setting whether Dock icons should bounce when the respective application demands your attention.
+```bash
+# Enable (Default)
+defaults write com.apple.dock no-bouncing -bool true && \
+killall Dock
+
+# Disable
+defaults write com.apple.dock no-bouncing -bool false && \
+killall Dock
+```
+
+#### Reset Dock
+```bash
+defaults delete com.apple.dock && \
+killall Dock
+```
+
+#### Resize
+Fully resize your Dock's body. To resize change the `0` value as an integer.
+```bash
+defaults write com.apple.dock tilesize -int 0 && \
+killall Dock
+```
+
+#### Scroll Gestures
+Use your touchpad or mouse scroll wheel to interact with Dock items. Allows you to use an upward scrolling gesture to open stacks. Using the same gesture on applications that are running invokes Exposé/Mission Control.
+```bash
+# Enable
+defaults write com.apple.dock scroll-to-open -bool true && \
+killall Dock
+
+# Disable (Default)
+defaults write com.apple.dock scroll-to-open -bool false && \
+killall Dock
+```
+
+#### Set Auto Show/Hide Delay
+The float number defines the show/hide delay in ms.
+```bash
+defaults write com.apple.Dock autohide-delay -float 0 && \
+killall Dock
+```
+
+#### Show Hidden App Icons
+```bash
+# Enable
+defaults write com.apple.dock showhidden -bool true && \
+killall Dock
+
+# Disable (Default)
+defaults write com.apple.dock showhidden -bool false && \
+killall Dock
+```
+
+## Documents
+
+#### Convert File to HTML
+Supported formats are plain text, rich text (rtf) and Microsoft Word (doc/docx).
+```bash
+textutil -convert html file.ext
+```
+
+
+## Files, Disks and Volumes
+
+#### Create an Empty File
+Creates an empty 10 gigabyte test file.
+```bash
+mkfile 10g /path/to/file
+```
 
 #### Disable Sudden Motion Sensor
 Leaving this turned on is useless when you're using SSDs.
@@ -422,75 +519,6 @@ Like the Disk Utility "Restore" function.
 sudo asr -restore -noverify -source /path/to/diskimage.dmg -target /Volumes/VolumeToRestoreTo
 ```
 
-
-## Dock
-
-#### Add a Stack with Recent Applications
-```bash
-defaults write com.apple.dock persistent-others -array-add '{ "tile-data" = { "list-type" = 1; }; "tile-type" = "recents-tile"; }' && \
-killall Dock
-```
-
-#### Add a Space
-```bash
-defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}' && \
-killall Dock
-```
-
-#### Icon Bounce
-Global setting whether Dock icons should bounce when the respective application demands your attention.
-```bash
-# Enable (Default)
-defaults write com.apple.dock no-bouncing -bool true && \
-killall Dock
-
-# Disable
-defaults write com.apple.dock no-bouncing -bool false && \
-killall Dock
-```
-
-#### Reset Dock
-```bash
-defaults delete com.apple.dock && \
-killall Dock
-```
-
-#### Resize
-Fully resize your Dock's body. To resize change the `0` value as an integer.
-```bash
-defaults write com.apple.dock tilesize -int 0 && \
-killall Dock
-```
-
-#### Scroll Gestures
-Use your touchpad or mouse scroll wheel to interact with Dock items. Allows you to use an upward scrolling gesture to open stacks. Using the same gesture on applications that are running invokes Exposé/Mission Control.
-```bash
-# Enable
-defaults write com.apple.dock scroll-to-open -bool true && \
-killall Dock
-
-# Disable (Default)
-defaults write com.apple.dock scroll-to-open -bool false && \
-killall Dock
-```
-
-#### Set Auto Show/Hide Delay
-The float number defines the show/hide delay in ms.
-```bash
-defaults write com.apple.Dock autohide-delay -float 0 && \
-killall Dock
-```
-
-#### Show Hidden App Icons
-```bash
-# Enable
-defaults write com.apple.dock showhidden -bool true && \
-killall Dock
-
-# Disable
-defaults write com.apple.dock showhidden -bool false && \
-killall Dock
-```
 
 ## Documents
 
@@ -1008,7 +1036,6 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl unload -w /System/Library/LaunchDaemons/ssh.plist
 ```
 
-
 ### TCP/IP
 
 #### Show Application Using a Certain Port
@@ -1020,6 +1047,15 @@ sudo lsof -i :80
 #### Show External IP Address
 ```bash
 dig +short myip.opendns.com @resolver1.opendns.com
+```
+
+### TFTP
+
+#### Start Native TFTP Daemon
+Files will be served from `/private/tftpboot`.
+```bash
+sudo launchctl load -F /System/Library/LaunchDaemons/tftp.plist && \
+sudo launchctl start com.apple.tftpd
 ```
 
 ### Wi-Fi
